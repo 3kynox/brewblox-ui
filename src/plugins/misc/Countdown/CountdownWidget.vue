@@ -76,14 +76,16 @@ export default class CountdownWidget extends WidgetBase<CountdownConfig> {
 
   onTimesUp() {
     clearInterval(this.timerInterval);
+    // eslint-disable-next-line no-console
+    console.log('it pass here!');
   }
 
   startTimer() {
     this.timerInterval = setInterval(() => (this.timePassed += 1), 1000);
   }
 
-  @Watch('now')
-  remainingTime(newValue) {
+  @Watch('timeLeft')
+  remainingTime(newValue): void {
     if (newValue === 0) {
       this.onTimesUp();
     }
