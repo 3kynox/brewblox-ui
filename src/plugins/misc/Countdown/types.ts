@@ -1,7 +1,9 @@
 import { Widget } from '@/store/dashboards';
 
 export interface CountdownSession {
-  rawTimeFraction: number;
+  timeStarted: number;
+  timeStopped: number | null;
+  stoppedDuration: number;
   running: boolean;
 }
 

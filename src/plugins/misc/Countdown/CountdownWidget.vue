@@ -14,16 +14,16 @@ const COLOR_CODES = {
     color: "green"
   },
   warning: {
-    color: "orange",
+    color: 'orange',
     threshold: WARNING_THRESHOLD
   },
   alert: {
-    color: "red",
+    color: 'red',
     threshold: ALERT_THRESHOLD
   }
 }
 
-const TIME_LIMIT = 600;
+const TIME_LIMIT = 20;
 
 @Component
 export default class CountdownWidget extends WidgetBase<CountdownConfig> {
@@ -59,7 +59,7 @@ export default class CountdownWidget extends WidgetBase<CountdownConfig> {
     return `${minutes}:${seconds}`;
   }
 
-  circleDasharray(): string {
+  get circleDasharray(): string {
     return `${(this.timeFraction * FULL_DASH_ARRAY).toFixed(0)} 283`;
   }
 
