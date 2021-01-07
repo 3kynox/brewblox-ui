@@ -5,28 +5,27 @@ import WidgetBase from '@/components/WidgetBase';
 
 import { CountdownConfig, CountdownSession } from './types';
 
-const FULL_DASH_ARRAY = 283;
-const WARNING_THRESHOLD = 10;
-const ALERT_THRESHOLD = 5;
-
-const COLOR_CODES = {
-  info: {
-    color: "green"
-  },
-  warning: {
-    color: 'orange',
-    threshold: WARNING_THRESHOLD
-  },
-  alert: {
-    color: 'red',
-    threshold: ALERT_THRESHOLD
-  }
-}
-
-const TIME_LIMIT = 20;
-
 @Component
 export default class CountdownWidget extends WidgetBase<CountdownConfig> {
+  readonly FULL_DASH_ARRAY: number = 283;
+  readonly WARNING_THRESHOLD: number = 10;
+  readonly ALERT_THRESHOLD: number = 5;
+
+  readonly COLOR_CODES: any = {
+    info: {
+      color: 'green',
+    },
+    warning: {
+      color: 'orange',
+      threshold: this.WARNING_THRESHOLD,
+    },
+    alert: {
+      color: 'red',
+      threshold: this.ALERT_THRESHOLD,
+    },
+  }
+
+  timeLimit = 20;
   timePassed: number = 0;
   timerInterval: any = null;
 
@@ -39,12 +38,12 @@ export default class CountdownWidget extends WidgetBase<CountdownConfig> {
   }
 
   get timeFraction(): number {
-    const rawTimeFraction = this.timeLeft / TIME_LIMIT;
-    return rawTimeFraction - (1 / TIME_LIMIT) * (1 - rawTimeFraction);
+    const rawTimeFraction = this.timeLeft / this.timeLimit;
+    return rawTimeFraction - (1 / this.timeLimit) * (1 - rawTimeFraction);
   }
 
   get timeLeft(): number {
-    return TIME_LIMIT - this.timePassed;
+    return this.timeLimit - this.timePassed;
   }
 
   get formattedTimeLeft(): string {
@@ -60,11 +59,11 @@ export default class CountdownWidget extends WidgetBase<CountdownConfig> {
   }
 
   get circleDasharray(): string {
-    return `${(this.timeFraction * FULL_DASH_ARRAY).toFixed(0)} 283`;
+    return `${(this.timeFraction * this.FULL_DASH_ARRAY).toFixed(0)} 283`;
   }
 
-  remainingPathColor() {
-    const { alert, warning, info } = COLOR_CODES;
+  get remainingPathColor() {
+    const { alert, warning, info } = this.COLOR_CODES;
 
     if (this.timeLeft <= alert.threshold) {
       return alert.color;
@@ -104,7 +103,7 @@ export default class CountdownWidget extends WidgetBase<CountdownConfig> {
     <div class="base-timer">
       <svg class="base-timer__svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
         <g class="base-timer__circle">
-          <circle class="base-timer__path-elapsed" cx="50" cy="50" r="45"></circle>
+          <circle class="base-timer__path-elapsed" cx="50" cy="50" r="45" />
           <path
             :stroke-dasharray="circleDasharray"
             class="base-timer__path-remaining"
@@ -115,7 +114,7 @@ export default class CountdownWidget extends WidgetBase<CountdownConfig> {
               a 45,45 0 1,0 90,0
               a 45,45 0 1,0 -90,0
             "
-          ></path>
+          />
         </g>
       </svg>
       <span class="base-timer__label">{{ formattedTimeLeft }}</span>
