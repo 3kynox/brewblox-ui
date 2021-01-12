@@ -69,7 +69,7 @@ export default class SparkActions extends Vue {
 </script>
 
 <template>
-  <ActionSubmenu :label="serviceTitle">
+  <ActionSubmenu>
     <CardWarning v-if="!sparkModule">
       <template #message>
         Service is not available
@@ -85,11 +85,6 @@ export default class SparkActions extends Vue {
         icon="mdi-magnify-plus-outline"
         label="Discover new OneWire blocks"
         @click="funcs.discoverBlocks(serviceId)"
-      />
-      <ActionItem
-        icon="mdi-tag-remove"
-        label="Remove unused block names"
-        @click="funcs.cleanUnusedNames(serviceId)"
       />
       <ActionItem
         icon="mdi-progress-download"
@@ -125,6 +120,11 @@ export default class SparkActions extends Vue {
         icon="mdi-power-plug"
         label="Export sensor and pin names"
         @click="funcs.saveHwInfo(serviceId)"
+      />
+      <ActionItem
+        icon="mdi-tag-remove"
+        label="Remove unused block names"
+        @click="funcs.cleanUnusedNames(serviceId)"
       />
       <ActionItem
         icon="delete"
