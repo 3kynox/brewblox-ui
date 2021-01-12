@@ -25,9 +25,14 @@ export default class CountdownWidget extends WidgetBase<CountdownConfig> {
     },
   }
 
-  timeLimit = 20;
   timePassed: number = 0;
-  timerInterval: any = null;
+  timerInterval: NodeJS.Timeout | null = null;
+  timeLeft: number = 0;
+  timeStarted: Date | null = null;
+  timeLimit = 20000;
+  formattedTimeLeft: string = '';
+  timeStopped: Date | null = null;
+  stoppedDuration: number = 0;
 
   get session(): CountdownSession | null {
     return this.config.session;
@@ -42,11 +47,15 @@ export default class CountdownWidget extends WidgetBase<CountdownConfig> {
     return rawTimeFraction - (1 / this.timeLimit) * (1 - rawTimeFraction);
   }
 
-  get timeLeft(): number {
+  /* get timeLeft(): number {
     return this.timeLimit - this.timePassed;
-  }
+  }*/
 
-  get formattedTimeLeft(): string {
+  /*set timeLeft(seconds: number) {
+    this.timeLeft = seconds;
+  }*/
+
+  /*get formattedTimeLeft(): string {
     const timeLeft: number = this.timeLeft;
     const minutes: number = Math.floor(timeLeft / 60);
     let seconds: any = timeLeft % 60;
@@ -56,7 +65,11 @@ export default class CountdownWidget extends WidgetBase<CountdownConfig> {
     }
 
     return `${minutes}:${seconds}`;
-  }
+  }*/
+
+  /*set formattedTimeLeft(timeLeft: string) {
+    this.formattedTimeLeft = timeLeft;
+  }*/
 
   get circleDasharray(): string {
     return `${(this.timeFraction * this.FULL_DASH_ARRAY).toFixed(0)} 283`;
@@ -74,25 +87,61 @@ export default class CountdownWidget extends WidgetBase<CountdownConfig> {
     }
   }
 
-  onTimesUp() {
-    clearInterval(this.timerInterval);
-    // eslint-disable-next-line no-console
-    console.log('it pass here!');
-  }
-
-  startTimer() {
-    this.timerInterval = setInterval(() => (this.timePassed += 1), 1000);
-  }
-
-  @Watch('timeLeft')
-  remainingTime(newValue): void {
-    if (newValue === 0) {
-      this.onTimesUp();
+  endInterval() {
+    if (this.timerInterval) {
+      this.timeStopped = new Date();
+      clearInterval(this.timerInterval);
+      this.timerInterval = null;
     }
   }
 
-  mounted(): void {
-    this.startTimer();
+  start(): void {
+    if (this.timeStopped) {
+      this.stoppedDuration += (new Date().getTime() - this.timeStopped.getTime());
+      this.timeStopped = null;
+    } else if (this.timeStarted) {
+      return;
+    } else {
+      this.timeStarted = new Date();
+      this.stoppedDuration = 0;
+    }
+
+    this.timerInterval = setInterval(this.tick, 10);
+  }
+
+  stop(): void {
+    if (!this.timeStarted) {
+      return;
+    }
+
+    this.endInterval();
+    this.timeStopped = new Date();
+  }
+
+  reset(): void {
+
+  }
+
+  tick(): void {
+    if (this.timeStarted === null) {
+      return;
+    }
+
+    const now = new Date();
+    const endTime = new Date(this.timeStarted.getTime() + this.timeLimit);
+    const remainingTimeMS = endTime.getTime() - now.getTime() + this.stoppedDuration;
+
+    if (remainingTimeMS < 0) {
+      this.endInterval();
+      return;
+    }
+
+    const remainingTime: Date = new Date(remainingTimeMS);
+    const hour = remainingTime.getUTCHours().toString().padStart(2, '0');
+    const min = remainingTime.getUTCMinutes().toString().padStart(2, '0');
+    const sec = remainingTime.getUTCSeconds().toString().padStart(2, '0');
+    const ms = Math.floor(remainingTime.getUTCMilliseconds() / 100).toString().padStart(1, '0');
+    this.formattedTimeLeft = `${hour}:${min}:${sec}.${ms}`;
   }
 }
 </script>
@@ -120,6 +169,12 @@ export default class CountdownWidget extends WidgetBase<CountdownConfig> {
         </g>
       </svg>
       <span class="base-timer__label">{{ formattedTimeLeft }}</span>
+      <div class="col-break" />
+      <div class="col row justify-center">
+        <q-btn flat label="Start / Resume" @click="start" />
+        <q-btn flat label="Stop" @click="stop" />
+        <q-btn flat label="Reset" @click="reset" />
+      </div>
     </div>
   </CardWrapper>
 </template>
